@@ -1,0 +1,30 @@
+.ss-container {
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.ss-sidebar {
+    --top-position: 0;
+    --bottom-position: 0;
+    position: sticky !important;
+}
+
+.ss-sticky-top {
+    justify-content: flex-start;
+}
+
+.ss-sticky-top .ss-sidebar {
+    top: var(--top-position);
+    bottom: auto;
+}
+
+.ss-sticky-bottom {
+    justify-content: flex-end;
+}
+
+.ss-sticky-bottom .ss-sidebar {
+    bottom: var(--bottom-position);
+    top: auto;
+}
