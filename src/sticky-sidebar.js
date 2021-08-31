@@ -70,7 +70,7 @@ class StickySidebar {
     destroy() {
         this.initEventActions('remove');
         this.initResizeSensorActions('remove');
-        this.resetValues();
+        this.removeStickyPosition();
         this.destroyLayout();
     }
 
@@ -182,26 +182,28 @@ class StickySidebar {
         }
 
         if (this.checkTopInContainer()) {
+            this.container.style.paddingBottom = '';
+
             if (this.scrollDirection === 'down') {
                 this.setBottomStickyPosition();
-            } else {
-                this.container.style.paddingBottom = '';
             }
         } else if (this.checkBottomInContainer()) {
+            this.container.style.paddingTop = '';
+
             if (this.scrollDirection === 'up') {
                 this.setTopStickyPosition();
-            } else {
-                this.container.style.paddingTop = '';
             }
         } else {
             if (this.scrollDirection === 'up') {
                 if (this.stickyPosition === 'bottom') {
                     this.container.style.paddingBottom = `${this.container.clientHeight - (this.sidebar.offsetTop + this.sidebar.offsetHeight)}px`;
+                    this.container.style.paddingTop = '';
                     this.setTopStickyPosition();
                 }
             } else {
                 if (this.stickyPosition === 'top') {
                     this.container.style.paddingTop = `${this.sidebar.offsetTop}px`;
+                    this.container.style.paddingBottom = '';
                     this.setBottomStickyPosition();
                 }
             }
@@ -220,14 +222,8 @@ class StickySidebar {
         const topPosition = this.getTopStickyPosition();
         const bottomPosition = this.getBottomStickyPosition();
 
-        const currentTopSpacing = this.sidebar.offsetTop;
-        const currentBottomSpacing = this.container.clientHeight - (this.sidebar.offsetTop + this.sidebar.offsetHeight);
-
-        const currentTopPosition = currentTopSpacing > topPosition ? topPosition : currentTopSpacing;
-        const currentBottomPosition = currentBottomSpacing > bottomPosition ? bottomPosition : currentBottomSpacing;
-
-        const topInViewport = this.sidebar.getBoundingClientRect().top > 0 && this.sidebar.getBoundingClientRect().top - currentTopPosition > 0;
-        const bottomInViewport = this.sidebar.getBoundingClientRect().bottom > 0 && (this.sidebar.getBoundingClientRect().bottom + currentBottomPosition) - document.documentElement.clientHeight < 0;
+        const topInViewport = this.sidebar.getBoundingClientRect().top - topPosition > 0;
+        const bottomInViewport = document.documentElement.clientHeight - bottomPosition - this.sidebar.getBoundingClientRect().bottom > 0;
 
         if (topInViewport) {
             this.setTopStickyPosition();
@@ -238,18 +234,22 @@ class StickySidebar {
 
     update() {
         if (this.checkStickyPossibility()) {
+            this.container.style.paddingTop = '';
+            this.container.style.paddingBottom = '';
+
             if (this.checkStickyScrolling()) {
-                if (this.checkBetweenInContainer()) {
-                    this.stickyPositionCorrection();
+                if (this.checkTopInContainer()) {
+                    this.setBottomStickyPosition();
+                } else if (this.checkBottomInContainer()) {
+                    this.setTopStickyPosition();
                 } else {
-                    this.setInitialStickyPosition();
+                    this.stickyPositionCorrection();
                 }
             } else {
-                this.resetValues();
                 this.setTopStickyPosition();
             }
         } else {
-            this.resetValues();
+            this.removeStickyPosition();
         }
     }
 
@@ -259,10 +259,6 @@ class StickySidebar {
 
     checkBottomInContainer() {
         return this.sidebar.offsetTop + this.sidebar.offsetHeight === this.container.clientHeight;
-    }
-
-    checkBetweenInContainer() {
-        return !this.checkTopInContainer() && !this.checkBottomInContainer();
     }
 
     checkStickyPossibility() {
@@ -277,32 +273,23 @@ class StickySidebar {
         return this.sidebar.offsetHeight > viewportHeight;
     }
 
-    setInitialStickyPosition() {
-        if (this.checkTopInContainer()) {
-            this.setBottomStickyPosition();
-        } else if (this.checkBottomInContainer()) {
-            this.setTopStickyPosition();
-        }
-    }
-
     setTopStickyPosition() {
-        this.container.style.paddingTop = '';
         this.container.classList.remove(this.stickyBottomClass);
         this.container.classList.add(this.stickyTopClass);
         this.stickyPosition = 'top';
     }
 
     setBottomStickyPosition() {
-        this.container.style.paddingBottom = '';
         this.container.classList.remove(this.stickyTopClass);
         this.container.classList.add(this.stickyBottomClass);
         this.stickyPosition = 'bottom';
     }
 
-    resetValues() {
+    removeStickyPosition() {
         this.container.style.paddingTop = '';
         this.container.style.paddingBottom = '';
         this.container.classList.remove(this.stickyTopClass, this.stickyBottomClass);
+        this.stickyPosition = '';
     }
 
     setScrollDirection() {
@@ -318,15 +305,15 @@ class StickySidebar {
     }
 
     getTopStickyPosition() {
-        return StickySidebar.getStyleValue(this.sidebar, '--top-position');
+        return StickySidebar.getStyleNumberValue(this.sidebar, '--top-position');
     }
 
     getBottomStickyPosition() {
-        return StickySidebar.getStyleValue(this.sidebar, '--bottom-position');
+        return StickySidebar.getStyleNumberValue(this.sidebar, '--bottom-position');
     }
 
-    static getStyleValue(element, propertyName) {
-        return parseFloat(window.getComputedStyle(element).getPropertyValue(propertyName));
+    static getStyleNumberValue(element, propertyName) {
+        return parseFloat(window.getComputedStyle(element).getPropertyValue(propertyName)) || 0;
     }
 
     static htmlElementsToArray(elements) {

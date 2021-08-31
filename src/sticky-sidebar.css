@@ -6,8 +6,8 @@
 }
 
 .ss-sidebar {
-    --top-position: 0;
-    --bottom-position: 0;
+    --top-position: 0px;
+    --bottom-position: 0px;
     position: sticky !important;
 }
 
