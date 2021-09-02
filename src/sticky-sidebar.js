@@ -200,7 +200,7 @@ class StickySidebar {
                     this.container.style.paddingTop = '';
                     this.setTopStickyPosition();
                 }
-            } else {
+            } else if (this.scrollDirection === 'down') {
                 if (this.stickyPosition === 'top') {
                     this.container.style.paddingTop = `${this.sidebar.offsetTop}px`;
                     this.container.style.paddingBottom = '';
@@ -238,9 +238,9 @@ class StickySidebar {
         if (this.checkStickyPossibility()) {
             if (this.checkStickyScrolling()) {
                 if (this.checkTopInContainer()) {
-                    this.setBottomStickyPosition();
-                } else if (this.checkBottomInContainer()) {
                     this.setTopStickyPosition();
+                } else if (this.checkBottomInContainer()) {
+                    this.setBottomStickyPosition();
                 } else {
                     this.stickyPositionCorrection();
                 }
