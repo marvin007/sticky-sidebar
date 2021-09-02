@@ -226,17 +226,16 @@ class StickySidebar {
         const bottomInViewport = document.documentElement.clientHeight - bottomPosition - this.sidebar.getBoundingClientRect().bottom > 0;
 
         if (topInViewport) {
+            this.removeContainerPaddings();
             this.setTopStickyPosition();
         } else if (bottomInViewport) {
+            this.removeContainerPaddings();
             this.setBottomStickyPosition();
         }
     }
 
     update() {
         if (this.checkStickyPossibility()) {
-            this.container.style.paddingTop = '';
-            this.container.style.paddingBottom = '';
-
             if (this.checkStickyScrolling()) {
                 if (this.checkTopInContainer()) {
                     this.setBottomStickyPosition();
@@ -246,6 +245,7 @@ class StickySidebar {
                     this.stickyPositionCorrection();
                 }
             } else {
+                this.removeContainerPaddings();
                 this.setTopStickyPosition();
             }
         } else {
@@ -286,10 +286,14 @@ class StickySidebar {
     }
 
     removeStickyPosition() {
-        this.container.style.paddingTop = '';
-        this.container.style.paddingBottom = '';
+        this.removeContainerPaddings();
         this.container.classList.remove(this.stickyTopClass, this.stickyBottomClass);
         this.stickyPosition = '';
+    }
+
+    removeContainerPaddings() {
+        this.container.style.paddingTop = '';
+        this.container.style.paddingBottom = '';
     }
 
     setScrollDirection() {
