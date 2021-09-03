@@ -8,7 +8,7 @@
 .ss-sidebar {
     --top-position: 0px;
     --bottom-position: 0px;
-    position: sticky !important;
+    position: sticky;
 }
 
 .ss-sticky-top {
