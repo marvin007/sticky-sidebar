@@ -1,4 +1,3 @@
-import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 import './sticky-sidebar.css';
 
 class StickySidebar {
@@ -33,7 +32,7 @@ class StickySidebar {
     stickyPosition = '';
 
     eventHandlers = new Map();
-    resizeSensorHandlers = new Map();
+    resizeObserverInstances = new Map();
 
     constructor(sidebar, customOptions = {}) {
         this.options = {
@@ -60,16 +59,16 @@ class StickySidebar {
         this.createLayout();
         this.bindMethods();
         this.debounceMethods();
-        this.setResizeSensorHandlers();
+        this.setResizeObserverInstances();
         this.setEventHandlers();
-        this.initResizeSensorActions('add');
+        this.initResizeObserverActions('add');
         this.initEventActions('add');
         this.update();
     }
 
     destroy() {
         this.initEventActions('remove');
-        this.initResizeSensorActions('remove');
+        this.initResizeObserverActions('remove');
         this.removeStickyPosition();
         this.destroyLayout();
     }
@@ -129,12 +128,12 @@ class StickySidebar {
         });
     }
 
-    setResizeSensorHandlers() {
+    setResizeObserverInstances() {
         [
-            [this.sidebar, this.sidebarResizeHandler],
-            [this.container, this.containerResizeHandler]
+            [this.sidebar, new ResizeObserver(this.sidebarResizeHandler)],
+            [this.container, new ResizeObserver(this.containerResizeHandler)]
         ].forEach((item) => {
-            this.resizeSensorHandlers.set(item[0], item[1]);
+            this.resizeObserverInstances.set(item[0], item[1]);
         });
     }
 
@@ -160,15 +159,15 @@ class StickySidebar {
         });
     }
 
-    initResizeSensorActions(action) {
-        this.resizeSensorHandlers.forEach((handler, elements) => {
+    initResizeObserverActions(action) {
+        this.resizeObserverInstances.forEach((instance, elements) => {
             elements = StickySidebar.htmlElementsToArray(elements);
 
             elements.forEach((element) => {
                 if (action === 'add') {
-                    new ResizeSensor(element, handler);
+                    instance.observe(element);
                 } else if (action === 'remove') {
-                    ResizeSensor.detach(element, handler);
+                    instance.unobserve(element);
                 }
             });
         });
